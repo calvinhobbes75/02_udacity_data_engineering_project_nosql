@@ -68,12 +68,12 @@ CREATE TABLE IF NOT EXISTS session_details (session_id int, item_in_session int,
 
 A second table **user_activity_in_session** will be created to answer Query 2 :
 ``` sql
-CREATE TABLE IF NOT EXISTS user_activity_in_session (user_id int, session_id int, item_in_session int, artist_name text, song_title text, user_firstname text, user_lastname text, PRIMARY KEY (user_id, session_id, item_in_session))
+CREATE TABLE IF NOT EXISTS user_activity_in_session (user_id int, session_id int, item_in_session int, artist_name text, song_title text, user_firstname text, user_lastname text, PRIMARY KEY ((user_id, session_id), item_in_session))
 ```
 
 A third table **songs_listeners** will be created to answer Query 3 :
 ``` sql
-CREATE TABLE IF NOT EXISTS songs_listeners (user_id int, song_title text, user_firstname text, user_lastname text, PRIMARY KEY (song_title, user_id))
+CREATE TABLE IF NOT EXISTS songs_listeners (song_title text, user_id int , user_firstname text, user_lastname text, PRIMARY KEY (song_title, user_id))
 ```
 
 ## **Insert data to Cassandra table**
@@ -93,7 +93,7 @@ INSERT INTO user_activity_in_session (user_id, session_id, item_in_session, arti
 
 Insert data to table **songs_listeners**
 ``` sql
-INSERT INTO songs_listeners (user_id, song_title, user_firstname, user_lastname) VALUES ( ?, ?, ?, ?)
+INSERT INTO songs_listeners (song_title, user_id, user_firstname, user_lastname) VALUES ( ?, ?, ?, ?)
 ```
 
 ## **Testing Data Model for Cassandra tables**
@@ -108,7 +108,7 @@ AND item_in_session = %s
 
 Answer to Query 2 : Give me only the following: name of artist, song (sorted by itemInSession) and user (first and last name) for userid = 10, sessionid = 182
 ``` sql
-SELECT item_in_session, artist_name, song_title, user_firstname, user_lastname \
+SELECT artist_name, song_title, user_firstname, user_lastname \
 FROM user_activity_in_session \
 WHERE user_id = %s \
 AND session_id = %s
@@ -116,7 +116,7 @@ AND session_id = %s
 
 Answer to Query 3 : Give  me every user name (first and last) in my music app history who listened to the song 'All Hands Against His Own'
 ``` sql
-SELECT user_id, user_firstname, user_lastname \
+SELECT user_firstname, user_lastname \
 FROM songs_listeners \
 WHERE song_title = %s
 ```
